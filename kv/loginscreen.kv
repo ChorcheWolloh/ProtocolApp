@@ -1,0 +1,33 @@
+<LoginScreen>:
+    canvas.before:
+        Rectangle:
+            source:'HDD2.png'
+            size: root.width, root.height
+            pos: self.pos
+    FloatLayout:
+        TextInput:
+            id: login_email
+            hint_text: 'Email'
+            multiline: False
+            size_hint: .8, .1
+            pos_hint: {'top': .9, 'right': .9}
+        TextInput:
+            id: login_password
+            password: True
+            hint_text: 'Password'
+            multiline: False
+            size_hint: .8, .1
+            pos_hint: {'top': .7, 'right': .9}
+        Label:
+            id: login_message
+            color: (1,0,0,1)
+            size_hint: .8, .1
+            pos_hint: {'top': .4, 'right': .9}
+        Button:
+            size_hint: .8, .1
+            pos_hint: {'top': .2, 'right': .9}
+            text: '[u]Sign up[/u]'
+            markup: True
+            on_release:
+                app.my_firebase.sign_up(login_email.text, login_password.text)
+

@@ -1,0 +1,101 @@
+<DrillingInfoPage>:
+    canvas.before:
+        Rectangle:
+            source:'HDD2.png'
+            size: root.width, root.height
+            pos: self.pos
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            font_size: 20
+            size_hint: 1, .4
+            text: 'Drilling Info Page'
+        GridLayout:
+            size_hint: 1, .1
+            cols:3
+            GridLayout:
+                cols:2
+                Label:
+                    text: 'BG'
+                TextInput:
+                    id: start
+                    multiline: False
+                    input_filter: 'int'
+            GridLayout:
+                cols:2
+                Label:
+                    text: 'BG'
+                TextInput:
+                    id: end
+                    multiline: False
+                    input_filter: 'int'
+            Button:
+                text: 'Confirm'
+                on_release:
+                    drilling_holes.text = 'BG' + start.text + ' -----> ' + 'BG' + end.text
+                    root.add_holes(start.text, end.text)
+        GridLayout:
+            size_hint: 1, .1
+            cols:3
+            GridLayout:
+                cols:2
+                Label:
+                    text: '%:'
+                TextInput:
+                    id: proc
+                    multiline: False
+                    input_filter: 'int'
+            GridLayout:
+                cols:2
+                Label:
+                    text: 'Depth:'
+                TextInput:
+                    id: depth
+                    multiline: False
+                    input_filter: 'int'
+            Button:
+                text: 'Add'
+                on_release:
+                    root.add_entry(proc.text, depth.text)
+                    proc.text = ''
+                    depth.text = ''
+        Label:
+            id: drilling_holes
+            size_hint: 1, .1
+            text: ''
+        Recycle:
+            id: drilling_data
+            data: self.data
+            viewclass: 'Label'
+            RecycleBoxLayout:
+                default_size: .7, '25dp'
+                default_size_hint: 1, None
+                size_hint_y: None
+                height: self.minimum_height
+                orientation: 'vertical'
+        GridLayout:
+            size_hint: 1, .1
+            cols: 2
+            Label:
+                text: 'Total Distance:'
+            TextInput:
+                id: total
+                size_hint: .5, 1
+                multiline: False
+                input_filter: 'int'
+        GridLayout:
+            size_hint: 1, .17
+            cols:2
+            Button:
+                text: 'Go Back'
+                on_release:
+                    app.root.current = 'protocolinfo'
+                    root.manager.transition.direction = 'right'
+            Button:
+                text: 'Confirm and Save'
+                on_release:
+                    app.root.current = 'main'
+                    root.manager.transition.direction = 'up'
+                    root.collect_final_info(total.text)
+                    app.send_protocol_to_firebase()
+                    app.clean_everything_and_return()

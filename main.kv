@@ -1,0 +1,25 @@
+#:include kv/profile.kv
+#:include kv/mainpage.kv
+#:include kv/protocolinfo.kv
+#:include kv/drillinginfo.kv
+#:include kv/loginscreen.kv
+
+WindowManager:
+    id: window_manager
+    LoginScreen:
+        id: login_screen
+        name: 'login_screen'
+    MainPage:
+        id: main
+        name: 'main'
+    ProtocolInfoPage:
+        id: protocolinfo
+        name: 'protocolinfo'
+    DrillingInfoPage:
+        id: drillinginfo
+        name: 'drillinginfo'
+    Profile:
+        id: profile
+        name: 'profile'
+
+
