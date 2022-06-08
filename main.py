@@ -5,7 +5,6 @@ from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition, SlideTransition
 from kivymd.app import MDApp
 from datetime import date
-
 import requests
 import json
 import re
@@ -210,8 +209,7 @@ class MyApp(MDApp):
                     # Get the Bohrprotocol number for MUP
                     bp_json = requests.get(
                         "https://protocol-app-hdd-default-rtdb.europe-west1.firebasedatabase.app/" + local_id +
-                        "/Protocols/" + str(
-                            all_data['Client']).lower() + f"/{all_data['Object']}" + ".json?auth=" + id_token)
+                        "/Protocols/" + str(all_data['Client']).lower() + f"/{all_data['Object']}" + ".json?auth=" + id_token)
                     bp_number_json = json.loads(bp_json.content.decode())
                     print(bp_number_json)
                     # Checks if its a new object and if so sets bp to 0
@@ -220,17 +218,21 @@ class MyApp(MDApp):
                     else:
                         bp_number = len(bp_number_json.keys())
                 except Exception as e:
-                    print('!!!Bohrprotokoll Exception MUP!!!')
+                    print('!!!Bohrprotokoll number Exception MUP!!!')
                     print(e)
                 # Sends the data to correct object with the correct numeration
-                requests.patch(
-                    url="https://protocol-app-hdd-default-rtdb.europe-west1.firebasedatabase.app/" + local_id +
-                        "/Protocols/mup/" + f"{all_data['Object']}/" + "BP" + str(bp_number + 1) + ".json?auth=" +
-                        id_token, json=json.loads(json_data))
+                try:
+                    requests.patch(
+                        url="https://protocol-app-hdd-default-rtdb.europe-west1.firebasedatabase.app/" + local_id +
+                            "/Protocols/mup/" + f"{all_data['Object']}/" + "BP" + str(bp_number + 1) + ".json?auth=" +
+                            id_token, json=json.loads(json_data))
 
-                self.root.ids['main'].ids['past_protocols'].data.append({'text': f"{all_data['Client']} "
-                                                                                 f"{all_data['Object']} BP"
-                                                                                 f"{bp_number+1}"})
+                    self.root.ids['main'].ids['past_protocols'].data.append({'text': f"{all_data['Client']} "
+                                                                                     f"{all_data['Object']} BP"
+                                                                                     f"{bp_number+1}"})
+                except Exception as e:
+                    print('!!!Exception on sending to MUP!!!')
+                    print(e)
 
             elif all_data['Client'] == 'FNB':
                 try:
@@ -249,36 +251,43 @@ class MyApp(MDApp):
                 except Exception as e:
                     print('!!!Bohrprotokoll Exception FNB!!!')
                     print(e)
-                # Sends the data to correct object with the correct numeration
-                requests.patch(
-                    url="https://protocol-app-hdd-default-rtdb.europe-west1.firebasedatabase.app/" + local_id +
-                        "/Protocols/fnb/" + f"{all_data['Object']}/" + "BP" + str(bp_number + 1) + ".json?auth=" +
-                        id_token, json=json.loads(json_data))
+                try:
+                    # Sends the data to correct object with the correct numeration
+                    requests.patch(
+                        url="https://protocol-app-hdd-default-rtdb.europe-west1.firebasedatabase.app/" + local_id +
+                            "/Protocols/fnb/" + f"{all_data['Object']}/" + "BP" + str(bp_number + 1) + ".json?auth=" +
+                            id_token, json=json.loads(json_data))
 
-                self.root.ids['main'].ids['past_protocols'].data.append({'text': f"{all_data['Client']} "
-                                                                                 f"{all_data['Object']} BP"
-                                                                                 f"{bp_number+1}"})
-
+                    self.root.ids['main'].ids['past_protocols'].data.append({'text': f"{all_data['Client']} "
+                                                                                     f"{all_data['Object']} BP"
+                                                                                     f"{bp_number+1}"})
+                except Exception as e:
+                    print("!!!Exception on sending to FNB!!!")
+                    print(e)
             else:
-                # Gets amount of past protocols from the database
-                olaf_bp_json = requests.get("https://protocol-app-hdd-default-rtdb.europe-west1.firebasedatabase.app/"
-                                    + local_id + "/PastOlaf" + ".json?auth=" + id_token)
-                olaf_bp = json.loads(olaf_bp_json.content.decode())
-                # Sets that value to a variable
-                olaf_number = olaf_bp["Previous BP"]
-                # Sends the data to correct object with the continues numeration
-                olaf_number += 1
-                requests.patch(
-                    url="https://protocol-app-hdd-default-rtdb.europe-west1.firebasedatabase.app/" + local_id +
-                        "/Protocols/olaf/" + f"{all_data['Object']}/" + "BP" + str(olaf_number) + ".json?auth=" +
-                        id_token, json=json.loads(json_data))
-                olaf_number_back = '{"Previous BP": %s}' % olaf_number
-                requests.patch("https://protocol-app-hdd-default-rtdb.europe-west1.firebasedatabase.app/"
-                               + local_id + "/PastOlaf" + ".json?auth=" + id_token, json=json.loads(olaf_number_back))
+                try:
+                    # Gets amount of past protocols from the database
+                    olaf_bp_json = requests.get("https://protocol-app-hdd-default-rtdb.europe-west1.firebasedatabase.app/"
+                                        + local_id + "/PastOlaf" + ".json?auth=" + id_token)
+                    olaf_bp = json.loads(olaf_bp_json.content.decode())
+                    # Sets that value to a variable
+                    olaf_number = olaf_bp["Previous BP"]
+                    # Sends the data to correct object with the continues numeration
+                    olaf_number += 1
+                    requests.patch(
+                        url="https://protocol-app-hdd-default-rtdb.europe-west1.firebasedatabase.app/" + local_id +
+                            "/Protocols/olaf/" + f"{all_data['Object']}/" + "BP" + str(olaf_number) + ".json?auth=" +
+                            id_token, json=json.loads(json_data))
+                    olaf_number_back = '{"Previous BP": %s}' % olaf_number
+                    requests.patch("https://protocol-app-hdd-default-rtdb.europe-west1.firebasedatabase.app/"
+                                   + local_id + "/PastOlaf" + ".json?auth=" + id_token, json=json.loads(olaf_number_back))
 
-                self.root.ids['main'].ids['past_protocols'].data.append({'text': f"{all_data['Client']} "
-                                                                                 f"{all_data['Object']} BP"
-                                                                                 f"{olaf_number}"})
+                    self.root.ids['main'].ids['past_protocols'].data.append({'text': f"{all_data['Client']} "
+                                                                                     f"{all_data['Object']} BP"
+                                                                                     f"{olaf_number}"})
+                except Exception as e:
+                    print("!!!Exception on sending Olaf!!!")
+                    print(e)
 
             # Updating RecycleView on the mainpage
 

@@ -30,7 +30,7 @@ class MyFirebase():
             # Create new key in db from localId
             #Default information - name, drill, location
             my_data = '{"Name": "", "Drill": "", "Loc": "", "Protocols": {"fnb": "","mup": "","olaf": ""},' \
-                      '"PastOlaf": ""}'
+                      '"PastOlaf": {"Previous BP": 0}}'
             post_request = requests.patch("https://protocol-app-hdd-default-rtdb.europe-west1.firebasedatabase.app/" + localId + '.json?auth=' + idToken, data=my_data)
             #print(post_request.ok)
             #print(post_request.content.decode())
