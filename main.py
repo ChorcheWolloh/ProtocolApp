@@ -1,20 +1,29 @@
+# Main Kivy imports
+import kivy
 from kivy.core.window import Window
 from kivy.uix.recycleview import RecycleView
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition, SlideTransition
 from kivymd.app import MDApp
+# Additional imports for functionality
 from datetime import date
+import time
 import requests
 import json
 import re
 from functools import partial
-
+# Local imports
+from kivymd.uix.behaviors.toggle_behavior import MDToggleButton
+from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.list import OneLineListItem
+from kivymd.uix.menu import MDDropdownMenu
+from kivy.metrics import dp
 from colorspopup import ColorsPopup
 from myfirebase import MyFirebase
 from profilepopup import ProfilePopup
 
-#Window.size = (300, 600)
+Window.size = (300, 600)
 
 
 class MainPage(Screen):
@@ -28,7 +37,7 @@ class Profile(Screen):
 class ProtocolInfoPage(Screen):
     casing_enabled = BooleanProperty(False)
     pilot = ObjectProperty(None)
-    extender = ObjectProperty(None)
+    address = ObjectProperty(None)
     reamer = ObjectProperty(None)
     caula = ObjectProperty(None)
     additional = ObjectProperty(None)
@@ -43,24 +52,58 @@ class ProtocolInfoPage(Screen):
     olaf = [obj for obj in object_list['OLAF'] if obj != None]
     fnb = [obj for obj in object_list['FNB'] if obj != None]
 
-    def update_client_object(self, text):
+    def update_menu(self, text):
         self.collected_info['Client'] = text
-        dropdown = self.ids.object_dropdown
-        if text == "MUP":
-            dropdown.values = self.mup
-        elif text == "Olaf Sitte":
-            dropdown.values = self.olaf
-        elif text == "FNB":
-            dropdown.values = self.fnb
+        if text == 'MUP':
+            menu_items = [
+                {
+                    "text": f"{i}",
+                    "viewclass": "OneLineListItem",
+                    "on_release": lambda x=f"{i}": self.menu_callback(x),
+                } for i in self.mup
+            ]
+        elif text == 'FNB':
+            menu_items = [
+                {
+                    "text": f"{i}",
+                    "viewclass": "OneLineListItem",
+                    "on_release": lambda x=f"{i}": self.menu_callback(x),
+                } for i in self.fnb
+            ]
+        else:
+            menu_items = [
+                {
+                    "text": f"{i}",
+                    "viewclass": "OneLineListItem",
+                    "on_release": lambda x=f"{i}": self.menu_callback(x),
+                } for i in self.olaf
+            ]
+
+        self.menu = MDDropdownMenu(
+            caller=self.ids.button,
+            position='center',
+            border_margin=dp(1),
+            items=menu_items,
+            width_mult=40000,
+        )
+
+    def enable_dropdown(self):
+        self.ids.button.disabled = False
+
+    def call_menu(self):
+        self.menu.open()
+
+    def menu_callback(self, text_item):
+        self.collected_info['Object'] = text_item
+        self.ids.button.text = text_item
+        self.menu.dismiss()
 
     def choose_open_type(self):
         self.pilot.disabled = True
-        self.extender.disabled = True
         self.reamer.disabled = True
 
     def choose_drill_type(self):
         self.pilot.disabled = False
-        self.extender.disabled = False
         self.reamer.disabled = False
 
     def caula_button_toggle(self, caula):
@@ -68,13 +111,15 @@ class ProtocolInfoPage(Screen):
             # Caula Off
             self.casing_enabled = False
             self.caula.text = ''
+            self.caula.normal_color = 'gray'
         else:
             # Caula On
             self.casing_enabled = True
+            self.caula.normal_color = kivy.utils.get_color_from_hex('1976d2')
 
     def collect_info(self):
         self.collected_info["Pilot Drill"] = self.pilot.text
-        self.collected_info["Extender"] = self.extender.text
+        self.collected_info["Address"] = self.address.text
         self.collected_info["Reamer"] = self.reamer.text
         self.collected_info["Caula/Casing"] = self.caula.text
         self.collected_info["Additional Info"] = self.additional.text
@@ -98,20 +143,38 @@ class DrillingInfoPage(Screen):
     dist = 3
     protocol = list()  # {Rod:_,Distance:_,Proc:_,Depth:_}
 
-    def add_holes(self, start, end):
-        ProtocolInfoPage.collected_info['Start BG'] = start
-        ProtocolInfoPage.collected_info['End BG'] = end
+    def edit_entry(self, proc, depth, rod, dist):
+        self.protocol[-1] = {"Rod": rod-1, "Distance": dist-3, "Proc": proc, "Depth": depth}
+        arrow = '[font=DejaVuSans.ttf]\u2193[/font]'
+        clean_entry = f"             R {rod-1} | D {dist-3} | % {proc} | {arrow} {depth}"
+        new_entry = OneLineListItem(text=clean_entry, on_press=lambda x: self.change_entry(proc, depth, new_entry))
+        self.ids.container.add_widget(new_entry)
+        self.ids.edit.disabled = True
+        self.ids.add.disabled = False
+
+    def change_entry(self, proc, depth, entry):
+        self.ids.proc.text = proc
+        self.ids.depth.text = depth
+        self.ids.container.remove_widget(entry)
+        self.ids.edit.disabled = False
+        self.ids.add.disabled = True
 
     def add_entry(self, proc, depth):
-        self.protocol.append({"Rod": 0, "Distance": 0, "Proc": 0, "Depth": 0})
+        self.protocol.append({"Rod": '', "Distance": '', "Proc": '', "Depth": ''})
         self.protocol[self.rod - 1]["Proc"] = proc
         self.protocol[self.rod - 1]["Depth"] = depth
         self.protocol[self.rod - 1]["Rod"] = self.rod
         self.protocol[self.rod - 1]["Distance"] = self.dist
-        clean_entry = re.sub(r"[,'{}]", '', str(self.protocol[self.rod - 1]))
-        self.ids.drilling_data.data.append({'text': clean_entry})
+        arrow = '[font=DejaVuSans.ttf]\u2193[/font]'
+        clean_entry = f"             R {self.rod} | D {self.dist} | % {proc} | {arrow} {depth}"
+        entry = OneLineListItem(text=clean_entry, on_press=lambda x: self.change_entry(proc, depth, entry))
+        self.ids.container.add_widget(entry)
         self.rod += 1
         self.dist += 3
+
+    def add_holes(self, start, end):
+        ProtocolInfoPage.collected_info['Start BG'] = start
+        ProtocolInfoPage.collected_info['End BG'] = end
 
     def collect_final_info(self, total):
         ProtocolInfoPage.collected_info["Total Distance"] = total
@@ -121,11 +184,19 @@ class DrillingInfoPage(Screen):
         self.dist = 3
 
 
-class WindowManager(ScreenManager):
+class PhotoScreen(Screen):
+    pass
+
+
+class SettingsScreen(Screen):
     pass
 
 
 class LoginScreen(Screen):
+    pass
+
+
+class WindowManager(ScreenManager):
     pass
 
 
@@ -141,6 +212,11 @@ class Recycle(RecycleView):
         self.data = []
 
 
+class MyToggleButton(MDRaisedButton, MDToggleButton):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
 class MyApp(MDApp):
     refresh_token_file = "refresh_token.txt"
     protocol_info = ProtocolInfoPage.collected_info
@@ -148,11 +224,19 @@ class MyApp(MDApp):
 
     olaf_number = 1
 
+    def change_theme(self):
+        if self.theme_cls.theme_style == 'Light':
+            self.theme_cls.theme_style = 'Dark'
+        else:
+            self.theme_cls.theme_style = 'Light'
+
     def build(self):
         self.my_firebase = MyFirebase()
+        self.theme_cls.primary_palette = "Blue"
         self.theme_cls.theme_style = "Dark"
         GUI = Builder.load_file('main.kv')
         return GUI
+
 
     def on_start(self):
         try:
@@ -173,7 +257,7 @@ class MyApp(MDApp):
             name.text = str(data['Name'])
             drill.text = str(data['Drill'])
             loc.text = str(data['Loc'])
-            self.root.ids['main'].ids["past_protocols"].data = []
+            #self.root.ids['main'].ids["past_protocols"].data = []
             self.root.transition = NoTransition()
             self.root.current = 'main'
             self.root.transition = SlideTransition()
@@ -281,15 +365,13 @@ class MyApp(MDApp):
                     olaf_number_back = '{"Previous BP": %s}' % olaf_number
                     requests.patch("https://protocol-app-hdd-default-rtdb.europe-west1.firebasedatabase.app/"
                                    + local_id + "/PastOlaf" + ".json?auth=" + id_token, json=json.loads(olaf_number_back))
-
+                    # Updating RecycleView on the mainpage
                     self.root.ids['main'].ids['past_protocols'].data.append({'text': f"{all_data['Client']} "
                                                                                      f"{all_data['Object']} BP"
                                                                                      f"{olaf_number}"})
                 except Exception as e:
                     print("!!!Exception on sending Olaf!!!")
                     print(e)
-
-            # Updating RecycleView on the mainpage
 
         except Exception as e:
             print('!!!Exception on sending!!!')
@@ -308,9 +390,10 @@ class MyApp(MDApp):
         for key, val in self.root.ids['drillinginfo'].ids.items():
             self.root.ids['drillinginfo'].ids[key].text = ''
         # Cleaning RecycleView with entries
-        self.root.ids['drillinginfo'].ids['drilling_data'].data = []
+        self.root.ids['drillinginfo'].ids['container'].clear_widgets()
 
         self.root.current = 'main'
+        self.root.transition.direction = 'up'
 
     def enable_signout(self, status):
         if status == True:
@@ -318,5 +401,17 @@ class MyApp(MDApp):
         else:
             self.root.ids['main'].ids['sign_out_btn'].disabled = True
 
+    def info_check(self):
+        if 'Client' in self.protocol_info.keys() and 'Object' in self.protocol_info.keys():
+            if self.protocol_info['Pilot Drill'] != '' and self.protocol_info['Reamer'] != '':
+                self.root.ids['drillinginfo'].ids.protocol_confirm.disabled = False
+            else:
+                self.root.ids['drillinginfo'].ids.protocol_confirm.disabled = True
+        else:
+            self.root.ids['drillinginfo'].ids.protocol_confirm.disabled = True
+
+
 if __name__ == '__main__':
     MyApp().run()
+
+print(ProtocolInfoPage.collected_info)

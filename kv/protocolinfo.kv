@@ -1,140 +1,183 @@
+
 <ProtocolInfoPage>
     pilot: pilot
-    extender: extender
+    address: address
     reamer: reamer
     caula: caula
     additional: additional
-    canvas.before:
-        Rectangle:
-            source:'HDD2.png'
-            size: root.width, root.height
-            pos: self.pos
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            font_size: 20
+    FloatLayout:
+        MDLabel:
+            pos_hint: {"center_x": .5, "center_y": .96}
+            halign: 'center'
             text: 'Client'
-        GridLayout:
-            cols:3
-            size: 50,50
-            ToggleButton:
-                id: mup
-                group: 'client'
-                text: 'MUP'
-                on_press: root.update_client_object(self.text)
-            ToggleButton:
-                id: olaf
-                group: 'client'
-                text: 'Olaf Sitte'
-                on_press: root.update_client_object(self.text)
-            ToggleButton:
-                id: fnb
-                group: 'client'
-                text: 'FNB'
-                on_press: root.update_client_object(self.text)
-        Label:
-            font_size: 20
+        MyToggleButton:
+            background_down: 'royalblue'
+            size_hint: .2, .062
+            pos_hint: {'x':0, "center_y": .9}
+            id: mup
+            group: 'client'
+            text: 'MUP'
+            on_press:
+                root.update_menu(self.text)
+                root.enable_dropdown()
+        MyToggleButton:
+            background_down: 'royalblue'
+            size_hint: .2, .062
+            pos_hint: {"center_x": .5, "center_y": .9}
+            id: olaf
+            group: 'client'
+            text: 'Olaf Sitte'
+            on_press:
+                root.update_menu(self.text)
+                root.enable_dropdown()
+        MyToggleButton:
+            background_down: 'royalblue'
+            size_hint: .2, .062
+            pos_hint: {'right':1, "center_y": .9}
+            id: fnb
+            group: 'client'
+            text: 'FNB'
+            on_press:
+                root.update_menu(self.text)
+                root.enable_dropdown()
+        MDLabel:
+            pos_hint: {"center_x": .5, "center_y": .84}
+            halign: 'center'
             text: 'Type of Work'
-        GridLayout:
-            cols:2
-            ToggleButton:
-                id: open
-                group: 'type'
-                text: 'digging'
-                on_press:
-                    root.choose_open_type()
-                    root.collected_info['Work'] = 'Open digging'
-            ToggleButton:
-                id: drilling
-                group: 'type'
-                text: 'drilling'
-                on_press:
-                    root.choose_drill_type()
-                    root.collected_info['Work'] = 'Drilling'
-        Spinner:
-            id: object_dropdown
-            size_hint: 1, 1
-            text: 'Choose Object'
-            #height: dp(40)
-            sync_height: True
-            values: root.olaf
-            on_text:
-                root.collected_info['Object'] = object_dropdown.text
-        GridLayout:
-            cols:2
-            Label:
-                text: 'Pilot Drill'
-            TextInput:
-                id: pilot
-                multiline: False
-                input_filter: 'int'
-        GridLayout:
-            cols:2
-            Label:
-                text: 'Extender'
-            TextInput:
-                id: extender
-                multiline: False
-                input_filter: 'int'
-        GridLayout:
-            cols:2
-            Label:
-                text: 'Reamer'
-            TextInput:
-                id: reamer
-                multiline: False
-                input_filter: 'int'
-        FloatLayout:
-            Label:
-                pos_hint: {'right': .75, 'y': .2}
-                size_hint: 1, 1
-                text: 'Liners'
-            Label:
-                pos_hint: {'right': 1, 'y': .05}
-                size_hint_y: 1
-                size_hint_x: .5
-                text_size: self.width, None
-                height: self.texture_size[1]
-                id: info
-            GridLayout:
-                pos_hint: {'right': .5, 'top': .5}
-                size_hint: .5, .5
-                cols:2
-                ToggleButton:
-                    id: big_liners
-                    text: '4x20'
-                    on_state: root.select_option(self)
-
-                ToggleButton:
-                    id: small_liners
-                    text: '8x10'
-                    on_state: root.select_option(self)
-        GridLayout:
-            cols:2
-            ToggleButton:
-                id: caula_btn
-                text: 'Caula/Casing'
-                on_state: root.caula_button_toggle(self)
-            TextInput:
-                id: caula
-                disabled: not root.casing_enabled
-                multiline: False
-                input_filter: 'int'
-        GridLayout:
-            cols:2
-            Label:
-                text: 'Additional Info'
-            TextInput:
-                id:additional
-        GridLayout:
-            cols:2
-            Button:
-                text: 'Go Back'
-                on_release:
-                    app.root.current = 'main'
-                    root.manager.transition.direction = 'right'
-            Button:
-                text: 'Confirm'
-                on_release:
-                    app.root.current = 'drillinginfo'
-                    root.collect_info()
+        MyToggleButton:
+            background_down: 'royalblue'
+            size_hint: .2, .062
+            pos_hint: {'x':.2, "center_y": .79}
+            id: open
+            group: 'type'
+            text: 'digging'
+            on_press:
+                root.choose_open_type()
+                root.collected_info['Work'] = 'Open digging'
+        MyToggleButton:
+            background_down: 'royalblue'
+            size_hint: .2, .062
+            pos_hint: {'right':.8, "center_y": .79}
+            id: drilling
+            group: 'type'
+            text: 'drilling'
+            on_press:
+                root.choose_drill_type()
+                root.collected_info['Work'] = 'Drilling'
+        MDRaisedButton:
+            md_bg_color_disabled: 'gray'
+            disabled: True
+            size_hint: 1, .065
+            id: button
+            text: "Choose Object"
+            pos_hint: {"center_x": .5, "center_y": .71}
+            on_release: root.call_menu()
+        MDTextFieldRound:
+            color_active: app.theme_cls.primary_light
+            normal_color: app.theme_cls.primary_dark
+            size_hint: .8, None
+            pos_hint: {"center_x": .5, "center_y": .64}
+            id: address
+            multiline: False
+            hint_text: "Address"
+            helper_text: "Название улицы/трассы/участка и т.д."
+            helper_text_mode: "on_focus"
+        MDLabel:
+            pos_hint: {"center_x": .25, "center_y": .57}
+            halign: 'center'
+            text: 'Pilot Drill'
+        MDTextFieldRound:
+            color_active: app.theme_cls.primary_light
+            normal_color: app.theme_cls.primary_dark
+            size_hint: .3, None
+            pos_hint: {"center_x": .7, "center_y": .57}
+            id: pilot
+            multiline: False
+            input_type: 'number'
+            input_filter: 'int'
+        MDLabel:
+            pos_hint: {"center_x": .25, "center_y": .5}
+            halign: 'center'
+            text: 'Reamer'
+        MDTextFieldRound:
+            color_active: app.theme_cls.primary_light
+            normal_color: app.theme_cls.primary_dark
+            size_hint: .3, None
+            pos_hint: {"center_x": .7, "center_y": .5}
+            id: reamer
+            multiline: False
+            input_type: 'number'
+            input_filter: 'int'
+        MDLabel:
+            halign: 'center'
+            pos_hint: {"center_x": .5, "center_y": .45}
+            #size_hint: 1, 1
+            text: 'Liners'
+        MDLabel:
+            md_bg_color: app.theme_cls.primary_light
+            halign: 'center'
+            pos_hint: {"center_x": .5, "center_y": .38}
+            size_hint: .85, .075
+            #size_hint_y: 1
+            #size_hint_x: .5
+            text_size: self.width, None
+            height: self.texture_size[1]
+            id: info
+        MyToggleButton:
+            background_down: 'royalblue'
+            size_hint: .2, .062
+            pos_hint: {'x':.2, "center_y": .3}
+            id: big_liners
+            text: '4x20'
+            on_state: root.select_option(self)
+        MyToggleButton:
+            background_down: 'royalblue'
+            size_hint: .2, .062
+            pos_hint: {'right':.8, "center_y": .3}
+            id: small_liners
+            text: '8x10'
+            on_state: root.select_option(self)
+        MyToggleButton:
+            background_down: 'royalblue'
+            size_hint: .2, .062
+            pos_hint: {"center_x": .2, "center_y": .22}
+            id: caula_btn
+            text: 'Caula/Casing'
+            on_state: root.caula_button_toggle(self)
+        MDTextFieldRound:
+            color_active: app.theme_cls.primary_light
+            normal_color: 'gray'
+            size_hint: .3, None
+            pos_hint: {"center_x": .7, "center_y": .22}
+            id: caula
+            disabled: not root.casing_enabled
+            max_text_length: 3
+            multiline: False
+            input_type: 'number'
+            input_filter: 'int'
+        MDTextFieldRound:
+            color_active: app.theme_cls.primary_light
+            normal_color: app.theme_cls.primary_dark
+            size_hint: .8, None
+            pos_hint: {"center_x": .5, "center_y": .15}
+            id: additional
+            multiline: False
+            hint_text: "Additional information"
+            helper_text: "Не обязательное поле"
+            helper_text_mode: "on_focus"
+        MDRaisedButton:
+            size_hint: .2, .062
+            pos_hint:{'x':0,'top':.1}
+            text: 'Go Back'
+            on_release:
+                app.root.current = 'main'
+                root.manager.transition.direction = 'right'
+        MDRaisedButton:
+            size_hint: .2, .062
+            pos_hint:{'right':1,'top':.1}
+            text: 'Confirm'
+            on_release:
+                root.manager.transition.direction = 'left'
+                app.root.current = 'drillinginfo'
+                root.collect_info()
+                app.info_check()

@@ -1,9 +1,4 @@
 <MainPage>:
-    canvas.before:
-        Rectangle:
-            source:'HDD2.png'
-            size: root.width, root.height
-            pos: self.pos
     Image:
         source: 'Bohrt2.png'
         size: self.texture_size
@@ -12,16 +7,25 @@
         #text: 'Protocol App'
         #size_hint: .3,.3
         #pos_hint: {'top':1,'center_x':.5}
-    Button:
-        text: 'Profile'
-        size_hint: .2,.1
+    MDIconButton:
+        #text: 'Profile'
+        #size_hint: .2,.1
+        icon_size: "64sp"
+        icon: 'account'
         pos_hint:{'top':1,'right':1}
         on_release:
             app.root.current = 'profile'
             root.manager.transition.direction = 'left'
-
-    Button:
-        size_hint: .6,.1
+    MDIconButton:
+        icon_size: "64sp"
+        icon: 'cog'
+        pos_hint:{'top':1, 'x':0}
+        on_release:
+            app.root.current = 'settings_screen'
+            root.manager.transition.direction = 'right'
+    MDRaisedButton:
+        font_size: "20sp"
+        size_hint: .6, .1
         pos_hint:{'center_x':.5,'y':.6}
         text: 'New'
         on_release:
@@ -31,29 +35,30 @@
         orientation: 'vertical'
         pos_hint:{'center_x':.5,'y':.1}
         size_hint: 1, .5
-        Label:
-            font_size: 20
-            size_hint_y: .3
-            text: 'Past Protocols'
-        RecycleProtocols:
-            id: past_protocols
-            data: self.data
-            viewclass: 'Label'
-            RecycleBoxLayout:
-                default_size: 1, '25dp'
-                default_size_hint: 1, None
-                size_hint_y: None
-                height: self.minimum_height
-                orientation: 'vertical'
-    GridLayout:
-        cols: 2
-        pos_hint:{'center_x':.5,'y':0}
-        size_hint: 1,.085
-        Button:
-            text: 'Exit'
-            on_release: app.stop()
-        Button:
-            disabled: True
-            id: sign_out_btn
-            text: 'Sign Out'
-            on_release: app.sign_out()
+        #MDLabel:
+            #halign: 'center'
+            #size_hint_y: .3
+            #text: 'Past Protocols'
+        #RecycleProtocols:
+            #id: past_protocols
+            #data: self.data
+            #viewclass: 'Label'
+            #RecycleBoxLayout:
+                #default_size: 1, '25dp'
+                #default_size_hint: 1, None
+                #size_hint_y: None
+                #height: self.minimum_height
+                #orientation: 'vertical'
+    MDRaisedButton:
+        size_hint: .2, .062
+        pos_hint:{'x':0,'top':.1}
+        text: 'Exit'
+        on_release: app.stop()
+    MDRaisedButton:
+        md_bg_color_disabled: 'gray'
+        size_hint: .2, .062
+        pos_hint:{'right':1,'top':.1}
+        disabled: True
+        id: sign_out_btn
+        text: 'Sign Out'
+        on_release: app.sign_out()

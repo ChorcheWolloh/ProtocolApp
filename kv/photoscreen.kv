@@ -1,0 +1,16 @@
+<PhotoScreen>:
+    orientation: 'vertical'
+    Camera:
+        id: camera
+        resolution: (720, 1280)
+        play: True
+    ToggleButton:
+        text: 'Play'
+        on_press: camera.play = not camera.play
+        size_hint_y: None
+        height: '48dp'
+    Button:
+        text: 'Capture'
+        size_hint_y: None
+        height: '48dp'
+        on_press: root.capture()

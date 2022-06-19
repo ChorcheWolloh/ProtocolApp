@@ -1,51 +1,50 @@
 <Profile>:
-    canvas.before:
-        Rectangle:
-            source:'HDD2.png'
-            size: root.width, root.height
-            pos: self.pos
     BoxLayout:
         orientation: 'vertical'
-        Label:
-            font_size: 20
+        MDLabel:
+            halign: 'center'
             text: 'Your Profile'
         GridLayout:
             cols:2
-            Label:
+            MDLabel:
+                halign: 'center'
                 text: 'Name'
-            Label:
+            MDLabel:
+                halign: 'center'
                 id: name
                 text: ''
         GridLayout:
             cols:2
-            Label:
+            MDLabel:
+                halign: 'center'
                 text: 'Drill'
-            Label:
+            MDLabel:
+                halign: 'center'
                 id: drill
                 text: ''
         GridLayout:
             cols:2
-            Label:
+            MDLabel:
+                halign: 'center'
                 text: 'Location System'
-            Label:
+            MDLabel:
+                halign: 'center'
                 id: location
                 text: ''
-        GridLayout:
-            cols:2
-            Label:
-                text: 'Enable Signout'
-            CheckBox:
-                on_active: app.enable_signout(self.active)
+        MDLabel:
+            halign: 'center'
+            text: ''
 
-        GridLayout:
-            cols:2
-            size_hint: 1, .45
-            Button:
-                text: 'Go Back'
-                on_release:
-                    app.root.current = 'main'
-                    root.manager.transition.direction = 'right'
-            Button:
-                text: 'Edit'
-                on_release:
-                    app.update_personal_info()
+    MDRaisedButton:
+        size_hint: .2, .062
+        pos_hint:{'x':0,'top':.1}
+        text: 'Go Back'
+        on_release:
+            app.root.current = 'main'
+            root.manager.transition.direction = 'right'
+    MDRaisedButton:
+        size_hint: .2, .062
+        pos_hint:{'right':1,'top':.1}
+        text: 'Edit'
+        on_release:
+            app.update_personal_info()

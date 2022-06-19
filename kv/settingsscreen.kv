@@ -1,0 +1,39 @@
+<SettingsScreen>
+    MDBoxLayout:
+        #md_bg_color: app.theme_cls.primary_color
+        orientation: 'vertical'
+        MDLabel:
+            text: "Settings Screen"
+            halign: "center"
+        MDGridLayout:
+            cols:2
+            #pos_hint:{'center_x':.5,'y':.1}
+            MDLabel:
+                halign: "center"
+                text: 'Enable Signout'
+                #theme_text_color: 'Primary'
+            MDCheckbox:
+                on_active: app.enable_signout(self.active)
+        MDGridLayout:
+            cols:2
+            #pos_hint:{'center_x':.5,'y':.1}
+            MDLabel:
+                halign: "center"
+                text: 'Change Theme'
+                #theme_text_color: 'Primary'
+            MDLabel:
+                text: ''
+        Label:
+            text: ''
+    MDIconButton:
+        pos_hint: {"center_x": .75, "center_y": .375}
+        icon: 'theme-light-dark'
+        on_press: app.change_theme()
+
+    MDRaisedButton:
+        size_hint: .2, .062
+        pos_hint:{'x':0,'top':.1}
+        text: 'Go Back'
+        on_release:
+            app.root.current = 'main'
+            root.manager.transition.direction = 'left'
